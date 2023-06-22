@@ -10,14 +10,18 @@
     <div class="col-sm-4">
       <div class="clearfix">
         <h2 class="float-start">Lists</h2>
+        <button class="btn btn-default float-end" title="Delete List..."
+                (click)="deleteTodoList()">
+          <i class="bi bi-journal-x"></i>
+        </button>
         <button class="btn btn-default float-end" title="New List..."
-          (click)="showNewListModal(newListModalTemplate)">
+                (click)="showNewListModal(newListModalTemplate)">
           <i class="bi bi-journal-plus"></i>
         </button>
       </div>
       <ul class="list-group">
         <li *ngFor="let list of lists; index as i" class="list-group-item"
-          [ngClass]="{ 'active': selectedList == list }" (click)="selectedList = list">
+          [ngClass]="{ 'active': selectedList == list }" (click)="selectedList = list; defaultSelectedItems = selectedList.items;">
           <div class="clearfix">
             <div class="float-start">
               {{ list.title }}
@@ -32,11 +36,16 @@
     <div class="col-sm-8" *ngIf="selectedList">
       <div class="clearfix">
         <h2 class="float-start">{{ selectedList.title }}</h2>
-        <button id="listOptions" class="btn btn-default float-end" title="List Options..."
-          (click)="showListOptionsModal(listOptionsModalTemplate)">
+        <button id="listOptions" class="btn btn-default float-end" style="padding-left:0px;padding-right:10px;" title="List Options..."
+                (click)="showListOptionsModal(listOptionsModalTemplate)">
           <i class="bi bi-three-dots-vertical"></i>
         </button>
-      </div>
+        <button (click)="getMarkedAsShortCut()"
+                class="btn btn-default float-end" role="button" style="padding-right:0px;padding-left:10px;" title="Shortcuts...">
+          <i class="bi bi-star-fill"></i>
+        </button>
+        <input type="text" class="form-control float-end" style="width:47%;" placeholder="Title filter" (keyup)="onKey($event)" />
+       </div>
       <ul id="todo-items" class="list-group mb-2">
         <li class="list-group-item" [style.background]="item.colour" *ngFor="let item of selectedList.items; index as i">
           <div class="d-flex">
@@ -53,6 +62,10 @@
               </div>
             </div>
             <div class="todo-item-commands">
+              <button (click)="markedAsShortCut(item.id.toString(), $event)"
+                      class="btn btn-default btn-xs" role="button">
+                <i class="bi bi-star"></i>
+              </button>
               <button *ngIf="item.id != 0" (click)="showItemDetailsModal(itemDetailsModalTemplate, item)"
                       class="btn btn-default btn-xs" role="button">
                 <i class="bi bi-three-dots-vertical"></i>

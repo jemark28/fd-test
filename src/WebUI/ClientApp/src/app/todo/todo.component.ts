@@ -38,7 +38,10 @@ export class TodoComponent implements OnInit {
   });
   todoItemColours = Object.values(Colours);
 
-  checkedItems = []; 
+  checkedItems = [];
+  shortCutIds = [];
+  defaultSelectedItems = [];
+  isGetShortcuts = true;
 
   constructor(
     private listsClient: TodoListsClient,
@@ -53,7 +56,8 @@ export class TodoComponent implements OnInit {
         this.lists = result.lists;
         this.priorityLevels = result.priorityLevels;
         if (this.lists.length) {
-          this.selectedList = this.lists[0];          
+          this.selectedList = this.lists[0];
+          this.defaultSelectedItems = this.selectedList.items;
           for (let item of this.selectedList.items) {
             if (item.done) {
               const index = this.selectedList.items.indexOf(item);
@@ -294,5 +298,47 @@ export class TodoComponent implements OnInit {
 
   onChange(event: any) {    
     event.target.style.backgroundColor = event.target.value;
+  }
+
+  deleteTodoList(): void {
+    this.selectedList.items.splice(0);
+    const itemIndex = this.lists.indexOf(this.selectedList);
+    this.lists.splice(itemIndex, 1);
+  }
+
+  markedAsShortCut(id: string, event: any): void {
+    if (event.target.classList.value == "bi bi-star") {
+      this.shortCutIds.push(id);
+      event.target.classList.replace('bi-star', 'bi-star-fill');
+    } else {
+      const index = this.shortCutIds.indexOf(id);
+      this.shortCutIds.splice(index, 1);
+      event.target.classList.replace('bi-star-fill', 'bi-star');
+    }
+  }
+
+  getMarkedAsShortCut(): void {
+    if (this.isGetShortcuts)
+    {
+      if (this.shortCutIds.length == 0)
+      {
+        return;
+      }
+
+      this.selectedList.items = this.selectedList.items.filter(x => this.shortCutIds.includes(x.id.toString()));
+      this.isGetShortcuts = false;
+      return;
+    }
+    this.selectedList.items = this.defaultSelectedItems;
+    this.isGetShortcuts = true;
+  }
+
+  onKey(event: any) {
+    if (event.target.value.length == 0)
+    {
+      this.selectedList.items = this.defaultSelectedItems;
+      return;
+    }
+    this.selectedList.items = this.defaultSelectedItems.filter(x => x.title.toLowerCase().includes(event.target.value.toLowerCase()));
   }
 }
